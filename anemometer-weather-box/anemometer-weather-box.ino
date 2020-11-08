@@ -3,6 +3,7 @@
  *
   Mitch's Weather Box Project!
   - BMP280 (Barometric pressure & Temp Sensor)
+    (https://learn.adafruit.com/adafruit-bmp280-barometric-pressure-plus-temperature-sensor-breakout/arduino-test)
   - Anemometer (By jostak): https://www.thingiverse.com/thing:2559929
     (Just requires hall effect sensor and a permenant magnet)
   - 1602A LCD (Using this guide: https://create.arduino.cc/projecthub/najad/interfacing-lcd1602-with-arduino-764ec4)  
@@ -14,6 +15,7 @@
     by Mitch Miller
  * 
  */
+ 
 #include <Wire.h>
 #include <LiquidCrystal.h>
 #include <Adafruit_BMP280.h>
@@ -47,7 +49,6 @@ void loop()
     rpm = 30*1000/(millis() - timeold)*half_revolutions;
     timeold = millis();
     half_revolutions = 0;
-    //Serial.println(rpm,DEC);
     printRPMToLCD(rpm);
   }
 
@@ -58,7 +59,7 @@ void loop()
 void setupLCD() {
   lcd.begin(16, 2);
   lcd.setCursor(0,0);
-  lcd.print("0 RPM");
+  lcd.print("0RPM");
 }
 
 void setupBMP() {
@@ -82,18 +83,18 @@ void printBMPToLCD() {
   //Bottom Line
   lcd.setCursor(0,1);
   lcd.print(temp);
-  lcd.print(" *C");
+  lcd.print("*C");
   lcd.print(" ");
 
-  lcd.print("Alt: ");
+  lcd.print("Alt:");
   lcd.print(alt);
-  lcd.print(" m");
+  lcd.print("m");
 }
 
 void printRPMToLCD(int rpm) {
   lcd.setCursor(0,0);
   lcd.print(rpm);
-  lcd.print(" RPM");
+  lcd.print("RPM");
 }
 
 // This function is called whenever a magnet/interrupt is detected by the arduino 
