@@ -2,6 +2,10 @@
  * 
  *
   Mitch's Weather Box Project!
+  - BMP280 (Barometric pressure & Temp Sensor)
+  - Anemometer (By jostak): https://www.thingiverse.com/thing:2559929
+    (Just requires hall effect sensor and a permenant magnet)
+  - 1602A LCD (Using this guide: https://create.arduino.cc/projecthub/najad/interfacing-lcd1602-with-arduino-764ec4)  
  *
  *
   Arduino Hall Effect Sensor Project
@@ -10,10 +14,14 @@
     by Mitch Miller
  * 
  */
+#include <Wire.h>
 #include <LiquidCrystal.h>
+#include <Adafruit_BMP280.h>
 
 const int rs = 12, en = 11, d4 = 6, d5 = 5, d6 = 4, d7 = 3;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+Adafruit_BMP280 bmp;
 
 volatile byte half_revolutions;
 unsigned int rpm;
@@ -29,6 +37,7 @@ void setup()
   timeold = 0;
 
   setupLCD();
+  setupBMP();
 }
  
 void loop()
@@ -39,24 +48,52 @@ void loop()
     timeold = millis();
     half_revolutions = 0;
     //Serial.println(rpm,DEC);
-    //printToLCD(rpm);
+    printRPMToLCD(rpm);
   }
+
+  printBMPToLCD();
+  delay(2000);
 }
 
 void setupLCD() {
   lcd.begin(16, 2);
   lcd.setCursor(0,0);
   lcd.print("0 RPM");
-  lcd.setCursor(0,1);
-  lcd.print("Weather Box"); 
 }
 
-void printToLCD(int rpm) {
+void setupBMP() {
+  if (!bmp.begin()) {
+    Serial.println(F("Could not find a valid BMP280 sensor, check wiring!"));
+    while (1);
+  }
+
+  /* Default settings from datasheet. */
+  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+}
+
+void printBMPToLCD() {
+  int alt = bmp.readAltitude(1013.25);
+  int temp = bmp.readTemperature();
+
+  //Bottom Line
+  lcd.setCursor(0,1);
+  lcd.print(temp);
+  lcd.print(" *C");
+  lcd.print(" ");
+
+  lcd.print("Alt: ");
+  lcd.print(alt);
+  lcd.print(" m");
+}
+
+void printRPMToLCD(int rpm) {
   lcd.setCursor(0,0);
   lcd.print(rpm);
   lcd.print(" RPM");
-  lcd.setCursor(0,1);
-  lcd.print("Weather Box");  
 }
 
 // This function is called whenever a magnet/interrupt is detected by the arduino 
