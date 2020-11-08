@@ -28,6 +28,8 @@ Adafruit_BMP280 bmp;
 volatile byte half_revolutions;
 unsigned int rpm;
 unsigned long timeold;
+
+const float circumference = 3.92699081699;
  
 void setup()
 {
@@ -59,7 +61,7 @@ void loop()
 void setupLCD() {
   lcd.begin(16, 2);
   lcd.setCursor(0,0);
-  lcd.print("0RPM");
+  lcd.print("0MPH");
 }
 
 void setupBMP() {
@@ -91,10 +93,25 @@ void printBMPToLCD() {
   lcd.print("m");
 }
 
+/*
+ * 75rpm = 0.28 mph
+ * circumference = diameter * pi 
+ * inches per minute = circumference * 5900
+ * inches per hour = inches per minute * 60
+ * miles per hour = inches per hour / 63360
+ */
+float calcMPH(int rpm) {
+  float inchesPerMinute = circumference * 5900;
+  float inchesPerHour = inchesPerMinute * 60;
+  float milesPerHour = inchesPerHour / 63360;   
+  return milesPerHour;
+}
+ 
 void printRPMToLCD(int rpm) {
   lcd.setCursor(0,0);
-  lcd.print(rpm);
-  lcd.print("RPM");
+  float mph = calcMPH(rpm);
+  lcd.print(mph);
+  lcd.print("MPH");
 }
 
 // This function is called whenever a magnet/interrupt is detected by the arduino 
